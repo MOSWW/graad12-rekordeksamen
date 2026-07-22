@@ -409,10 +409,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg2);color:#1e293b;min-he
           <span><span id="telOngemerk" style="font-weight:600;color:#ef4444">0</span> ongemerk</span>
           <span style="margin-left:auto;color:#94a3b8">Verstek: Afwesig &nbsp;·&nbsp; Klik: Afwesig → Aanwesig → Ongemerk → Afwesig</span>
         </div>
-        <table class="rooster-table">
-          <thead><tr><th style="width:56px">#</th><th>Leerder</th><th style="width:160px">Status</th></tr></thead>
-          <tbody id="registerLys"></tbody>
-        </table>
+        <div id="registerLys" style="padding:14px 20px;display:grid;grid-template-columns:repeat(3,1fr);gap:0 24px"></div>
       </div>
 
       <!-- Gestooorde registers oorsig -->
@@ -1542,16 +1539,27 @@ function renderRegister(){
   document.getElementById("telGemerk").textContent=gemerk;
   document.getElementById("telOngemerk").textContent=ongemark;
   document.getElementById("registerTelling").textContent=`${klaslys.length} leerders`;
-  lys.innerHTML=gefilt.map((n,i)=>{
+  const KOLOMME=3;
+  const perKolom=Math.ceil(gefilt.length/KOLOMME)||1;
+  const rigRy=(n,i)=>{
     const s=registerState.leerders[n]||"afwesig";
     const lbl=s==="aanwesig"?"Aanwesig":s==="afwesig"?"Afwesig":"Ongemerk";
     const badgeKlas=s==="aanwesig"?"status-aanwesig":s==="afwesig"?"status-afwesig":"status-opstel";
     return`<tr onclick="wisselStatus('${n.replace(/'/g,"\\'")}')" style="cursor:pointer">
-      <td style="color:#94a3b8;font-size:12px">${i+1}</td>
-      <td style="font-weight:500">${n}</td>
-      <td><span class="status-badge ${badgeKlas}">${lbl}</span></td>
+      <td style="color:#94a3b8;font-size:12px;width:28px">${i+1}</td>
+      <td style="font-weight:500;font-size:13.5px;padding-right:6px">${n}</td>
+      <td style="width:100px"><span class="status-badge ${badgeKlas}" style="font-size:11px">${lbl}</span></td>
     </tr>`;
-  }).join("");
+  };
+  let html="";
+  for(let k=0;k<KOLOMME;k++){
+    const stuk=gefilt.slice(k*perKolom,(k+1)*perKolom);
+    if(!stuk.length)continue;
+    html+=`<table class="rooster-table" style="${k>0?"border-left:1px solid var(--card-border);":""}">
+      <tbody>${stuk.map((n,idx)=>rigRy(n,k*perKolom+idx)).join("")}</tbody>
+    </table>`;
+  }
+  lys.innerHTML=html||'<p style="font-size:13px;color:#94a3b8;grid-column:1/-1">Geen leerders pas by die soekterm nie.</p>';
 }
 
 function wisselStatus(naam){

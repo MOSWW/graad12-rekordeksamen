@@ -406,9 +406,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg2);color:#1e293b;min-he
         <div style="padding:8px 20px;background:#fafbfc;border-bottom:1px solid var(--card-border);display:flex;gap:16px;font-size:12px;color:#64748b">
           <span><span id="telGemerk" style="font-weight:600;color:#1e293b">0</span> gemerk</span>
           <span><span id="telOngemerk" style="font-weight:600;color:#ef4444">0</span> ongemerk</span>
-          <span style="margin-left:auto;color:#94a3b8">Klik: Ongemerk → Aanwesig → Afwesig → Ongemerk</span>
+          <span style="margin-left:auto;color:#94a3b8">Verstek: Afwesig &nbsp;·&nbsp; Klik: Afwesig → Aanwesig → Ongemerk → Afwesig</span>
         </div>
-        <div id="registerLys" style="padding:12px 16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px"></div>
+        <table class="rooster-table">
+          <thead><tr><th style="width:56px">#</th><th>Leerder</th><th style="width:160px">Status</th></tr></thead>
+          <tbody id="registerLys"></tbody>
+        </table>
       </div>
 
       <!-- Gestooorde registers oorsig -->
@@ -1410,7 +1413,7 @@ function oopRegister(){
   const klaslys=(db.klaslystePerVraestel&&db.klaslystePerVraestel[eksamen+"|"+currentGraad])||[];
   if(!klaslys.length){showToast("Geen klaslys vir hierdie vraestel nie");return;}
   registerState={eksamen,datum,graad:currentGraad,leerders:{}};
-  klaslys.forEach(n=>{registerState.leerders[n]="ongemark";});
+  klaslys.forEach(n=>{registerState.leerders[n]="afwesig";});
   document.getElementById("registerTitel").textContent=eksamen+" — Register";
   document.getElementById("afwesigRegister").style.display="block";
   document.getElementById("registerSoek").value="";
@@ -1428,19 +1431,21 @@ function renderRegister(){
   document.getElementById("telGemerk").textContent=gemerk;
   document.getElementById("telOngemerk").textContent=ongemark;
   document.getElementById("registerTelling").textContent=`${klaslys.length} leerders`;
-  lys.innerHTML=gefilt.map(n=>{
-    const s=registerState.leerders[n]||"ongemark";
+  lys.innerHTML=gefilt.map((n,i)=>{
+    const s=registerState.leerders[n]||"afwesig";
     const lbl=s==="aanwesig"?"Aanwesig":s==="afwesig"?"Afwesig":"Ongemerk";
-    return`<div class="reg-card ${s}" onclick="wisselStatus('${n.replace(/'/g,"\\'")}')">
-      <span class="reg-naam">${n}</span>
-      <span class="reg-status">${lbl}</span>
-    </div>`;
+    const badgeKlas=s==="aanwesig"?"status-aanwesig":s==="afwesig"?"status-afwesig":"status-opstel";
+    return`<tr onclick="wisselStatus('${n.replace(/'/g,"\\'")}')" style="cursor:pointer">
+      <td style="color:#94a3b8;font-size:12px">${i+1}</td>
+      <td style="font-weight:500">${n}</td>
+      <td><span class="status-badge ${badgeKlas}">${lbl}</span></td>
+    </tr>`;
   }).join("");
 }
 
 function wisselStatus(naam){
-  const huidig=registerState.leerders[naam]||"ongemark";
-  registerState.leerders[naam]=huidig==="ongemark"?"aanwesig":huidig==="aanwesig"?"afwesig":"ongemark";
+  const huidig=registerState.leerders[naam]||"afwesig";
+  registerState.leerders[naam]=huidig==="afwesig"?"aanwesig":huidig==="aanwesig"?"ongemark":"afwesig";
   renderRegister();
 }
 

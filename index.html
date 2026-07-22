@@ -7,6 +7,7 @@
 <title>Graad 12 Rekordeksamen — Bestuurstelsel</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -1344,36 +1345,146 @@ function afwesigSluitKO(){
   document.getElementById("koKlaslysPanel").style.display="none";
 }
 
+let klaslysUitgebrei={};
+
+function toggleKlaslysUitgebrei(sleutel){
+  klaslysUitgebrei[sleutel]=!klaslysUitgebrei[sleutel];
+  renderKoKlaslysPanel();
+}
+
 function renderKoKlaslysPanel(){
   if(!db.klaslystePerVraestel)db.klaslystePerVraestel={};
   const eks=db.eksamens.filter(e=>e.graad===currentGraad);
   const container=document.getElementById("koKlaslysLys");
   if(!eks.length){container.innerHTML='<p style="font-size:13px;color:#94a3b8">Geen eksamens geskeduleer vir hierdie graad nie.</p>';return;}
-  container.innerHTML=eks.map(e=>{
-    const lys=(db.klaslystePerVraestel[e.vak+"|"+currentGraad])||[];
-    return`<div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--card-border)">
-      <span style="font-size:13px;font-weight:500;flex:1">${e.vak}</span>
-      ${lys.length?`<span style="font-size:12px;color:#166534;background:#f0fdf4;padding:2px 10px;border-radius:99px">${lys.length} leerders</span>`:`<span style="font-size:12px;color:#94a3b8">Geen klaslys</span>`}
-      <label style="cursor:pointer;display:inline-flex;align-items:center;gap:5px;font-size:12px;padding:4px 10px;border:1px solid var(--card-border);border-radius:var(--radius);background:#fff;color:#475569">
-        <i class="ti ti-upload" aria-hidden="true"></i>Laai op
-        <input type="file" accept=".csv" style="display:none" onchange="laaiVraestelKlaslys(this,'${e.vak}')">
-      </label>
-      ${lys.length?`<button onclick="verwyderVraestelKlaslys('${e.vak}')" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:14px"><i class="ti ti-trash" aria-hidden="true"></i></button>`:""}
+  container.innerHTML=eks.map((e,i)=>{
+    const sleutel=e.vak+"|"+currentGraad;
+    const lys=db.klaslystePerVraestel[sleutel]||[];
+    const uitgebrei=!!klaslysUitgebrei[sleutel];
+    const inputId="handmatigLeerder_"+i;
+    return`<div style="border-bottom:1px solid var(--card-border)">
+      <div style="display:flex;align-items:center;gap:12px;padding:8px 0">
+        <button onclick="toggleKlaslysUitgebrei('${sleutel}')" style="background:none;border:none;cursor:pointer;color:#94a3b8;padding:2px;font-size:14px" title="Wys/verberg leerders">
+          <i class="ti ti-chevron-${uitgebrei?"down":"right"}" aria-hidden="true"></i>
+        </button>
+        <span style="font-size:13px;font-weight:500;flex:1">${e.vak}</span>
+        ${lys.length?`<span style="font-size:12px;color:#166534;background:#f0fdf4;padding:2px 10px;border-radius:99px">${lys.length} leerders</span>`:`<span style="font-size:12px;color:#94a3b8">Geen klaslys</span>`}
+        <label style="cursor:pointer;display:inline-flex;align-items:center;gap:5px;font-size:12px;padding:4px 10px;border:1px solid var(--card-border);border-radius:var(--radius);background:#fff;color:#475569" title="Kies een of meer Gibbon-lêers (.xlsx of .csv) — hulle word by die lys gevoeg">
+          <i class="ti ti-upload" aria-hidden="true"></i>Laai op (meer as een)
+          <input type="file" accept=".csv,.xlsx,.xls" multiple style="display:none" onchange="laaiVraestelKlaslys(this,'${e.vak}')">
+        </label>
+        ${lys.length?`<button onclick="verwyderVraestelKlaslys('${e.vak}')" title="Verwyder hele klaslys" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:14px"><i class="ti ti-trash" aria-hidden="true"></i></button>`:""}
+      </div>
+      ${uitgebrei?`<div style="padding:0 0 14px 30px">
+        ${lys.length?`<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">
+          ${lys.map(n=>`<span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;background:#f1f5f9;color:#374151;padding:3px 4px 3px 10px;border-radius:99px">${n}<button onclick="verwyderEenLeerderKlaslys('${sleutel}','${n.replace(/'/g,"\\'")}')" title="Verwyder ${n}" style="background:none;border:none;color:#94a3b8;cursor:pointer;font-size:14px;line-height:1;padding:2px 4px">×</button></span>`).join("")}
+        </div>`:`<p style="font-size:12px;color:#94a3b8;margin-bottom:10px">Nog geen leerders in hierdie klaslys nie.</p>`}
+        <div style="display:flex;gap:6px;align-items:center;max-width:360px">
+          <input id="${inputId}" placeholder="Voeg leerder handmatig by (Voornaam Van)" style="flex:1;font-family:inherit;font-size:12px;padding:6px 10px;border:1px solid var(--card-border);border-radius:var(--radius)" onkeydown="if(event.key==='Enter'){voegEenLeerderBy('${sleutel}','${inputId}');}">
+          <button onclick="voegEenLeerderBy('${sleutel}','${inputId}')" style="background:var(--navy);color:#fff;border:none;padding:6px 14px;border-radius:var(--radius);font-family:inherit;font-size:12px;cursor:pointer">Voeg by</button>
+        </div>
+      </div>`:""}
     </div>`;
   }).join("");
 }
 
+function verwyderEenLeerderKlaslys(sleutel,naam){
+  if(!db.klaslystePerVraestel||!db.klaslystePerVraestel[sleutel])return;
+  if(!confirm(naam+" uit hierdie klaslys verwyder?"))return;
+  db.klaslystePerVraestel[sleutel]=db.klaslystePerVraestel[sleutel].filter(n=>n!==naam);
+  save();renderKoKlaslysPanel();toonKlaslysStatus();showToast(naam+" verwyder uit klaslys");
+}
+
+function voegEenLeerderBy(sleutel,inputId){
+  const el=document.getElementById(inputId);
+  if(!el)return;
+  const naam=el.value.trim();
+  if(!naam)return;
+  if(!db.klaslystePerVraestel)db.klaslystePerVraestel={};
+  if(!db.klaslystePerVraestel[sleutel])db.klaslystePerVraestel[sleutel]=[];
+  if(db.klaslystePerVraestel[sleutel].some(n=>n.toLowerCase()===naam.toLowerCase())){
+    showToast(naam+" is reeds in die klaslys");
+    el.value="";
+    return;
+  }
+  db.klaslystePerVraestel[sleutel].push(naam);
+  db.klaslystePerVraestel[sleutel].sort((a,b)=>a.localeCompare(b,"af"));
+  save();renderKoKlaslysPanel();toonKlaslysStatus();showToast(naam+" bygevoeg");
+}
+
+const NAAM_KOP=["naam","name","voornaam","first name","firstname","preferredname","preferred name","given name","voorname"];
+const VAN_KOP=["van","surname","last name","lastname","family name"];
+
+// Neem 'n reeks rye (array van arrays — eerste ry is dalk 'n kopreël) en gee
+// 'n skoon lys volle name terug. Herken outomaties "Naam"+"Van"-kolomme
+// (soos Gibbon dit uitvoer) en kombineer dit; anders gebruik dit die eerste
+// kolom soos voorheen (vir eenvoudige een-kolom CSV-lyste).
+function volleNaamUitRye(rows){
+  if(!rows||!rows.length)return[];
+  const kop=(rows[0]||[]).map(c=>String(c||"").trim().toLowerCase());
+  let naamI=-1,vanI=-1;
+  kop.forEach((c,i)=>{
+    if(vanI===-1&&VAN_KOP.includes(c))vanI=i;
+    else if(naamI===-1&&NAAM_KOP.includes(c))naamI=i;
+  });
+  const harKop=naamI>-1||vanI>-1;
+  const dataRye=harKop?rows.slice(1):rows;
+  const uit=[];
+  dataRye.forEach(r=>{
+    if(!r||!r.length)return;
+    let vol="";
+    if(harKop&&naamI>-1&&vanI>-1){
+      vol=`${String(r[naamI]||"").trim()} ${String(r[vanI]||"").trim()}`.trim();
+    } else if(harKop&&naamI>-1){
+      vol=String(r[naamI]||"").trim();
+    } else if(harKop&&vanI>-1){
+      vol=String(r[vanI]||"").trim();
+    } else {
+      vol=String(r[0]||"").trim().replace(/^"|"$/g,"");
+    }
+    if(vol&&vol.toLowerCase()!=="naam"&&vol.toLowerCase()!=="name"&&vol.length>1)uit.push(vol);
+  });
+  return uit;
+}
+
 function laaiVraestelKlaslys(input,vak){
-  const file=input.files[0];
-  if(!file)return;
-  const reader=new FileReader();
-  reader.onload=function(e){
-    const name=e.target.result.split("\n").map(r=>r.split(",")[0].trim().replace(/^"|"$/g,"")).filter(n=>n&&n.toLowerCase()!=="naam"&&n.toLowerCase()!=="name"&&n.length>1);
-    if(!db.klaslystePerVraestel)db.klaslystePerVraestel={};
-    db.klaslystePerVraestel[vak+"|"+currentGraad]=name;
-    save();renderKoKlaslysPanel();toonKlaslysStatus();showToast(name.length+" leerders opgelaai vir "+vak);
-  };
-  reader.readAsText(file);
+  const files=Array.from(input.files||[]);
+  if(!files.length)return;
+  if(typeof XLSX==="undefined"){showToast("Kon nie die Excel-leser laai nie — probeer weer of gebruik CSV");return;}
+  const sleutel=vak+"|"+currentGraad;
+  if(!db.klaslystePerVraestel)db.klaslystePerVraestel={};
+  const bestaande=db.klaslystePerVraestel[sleutel]||[];
+  const totaal=[...bestaande];
+  let verwerk=0,foute=0;
+  files.forEach(file=>{
+    const ext=file.name.split(".").pop().toLowerCase();
+    const reader=new FileReader();
+    reader.onload=function(e){
+      try{
+        let rows;
+        if(ext==="csv"){
+          rows=e.target.result.split(/\r?\n/).filter(l=>l.trim().length).map(l=>l.split(","));
+        } else {
+          const wb=XLSX.read(e.target.result,{type:"array"});
+          const blad=wb.Sheets[wb.SheetNames[0]];
+          rows=XLSX.utils.sheet_to_json(blad,{header:1,blankrows:false});
+        }
+        volleNaamUitRye(rows).forEach(n=>{
+          if(!totaal.some(x=>x.toLowerCase()===n.toLowerCase()))totaal.push(n);
+        });
+      }catch(err){foute++;}
+      verwerk++;
+      if(verwerk===files.length){
+        totaal.sort((a,b)=>a.localeCompare(b,"af"));
+        db.klaslystePerVraestel[sleutel]=totaal;
+        save();renderKoKlaslysPanel();toonKlaslysStatus();
+        const boodskap=foute?`${totaal.length} leerders in klaslys — ${foute} lêer(s) kon nie gelees word nie`:`${totaal.length} leerders in klaslys vir ${vak} (${files.length} lêer${files.length>1?"s":""} verwerk)`;
+        showToast(boodskap);
+      }
+    };
+    if(ext==="csv")reader.readAsText(file);
+    else reader.readAsArrayBuffer(file);
+  });
   input.value="";
 }
 

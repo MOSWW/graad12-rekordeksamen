@@ -1051,30 +1051,30 @@ function load(){
 // gebruik om die stelsel te saai (kyk db.seeded hieronder). Datum-formaat verkeerd?
 // Wysig gerus die datum/tyd/tydsduur velde hier direk.
 const DEFAULT_EKSAMENS=[
-  {vak:"RTT Prakties (Dugga)",datum:"2026-08-11",tyd:"08:00",tydsduur:"3 ure"},
-  {vak:"Afrikaans Vraestel 2 (Skryf)",datum:"2026-08-24",tyd:"08:00",tydsduur:"3 ure"},
-  {vak:"Besigheidstudies",datum:"2026-08-25",tyd:"08:00",tydsduur:"3 ure"},
-  {vak:"IGO Vraestel 1 (A3 Druk)",datum:"2026-08-26",tyd:"08:00",tydsduur:"3 ure"},
-  {vak:"English Paper 2 (Write)",datum:"2026-08-27",tyd:"08:00",tydsduur:"3 ure"},
-  {vak:"Lewenswetenskappe Vraestel 1",datum:"2026-08-28",tyd:"08:00",tydsduur:"3 ure"},
-  {vak:"Wiskunde Vraestel 1",datum:"2026-08-31",tyd:"08:00",tydsduur:"3 ure"},
-  {vak:"Wiskundige Geletterdheid Vraestel 1",datum:"2026-08-31",tyd:"08:00",tydsduur:"3 ure"},
-  {vak:"Rekeningkunde Vraestel 1",datum:"2026-09-01",tyd:"08:00",tydsduur:"2 ure"},
-  {vak:"Geografie Vraestel 1",datum:"2026-09-01",tyd:"08:00",tydsduur:"3 ure"},
-  {vak:"Rekeningkunde Vraestel 2",datum:"2026-09-01",tyd:"13:00",tydsduur:"2 ure"},
-  {vak:"Geografie Vraestel 2",datum:"2026-09-01",tyd:"13:00",tydsduur:"1,5 ure"},
-  {vak:"IGO Vraestel 2 (A3 Druk)",datum:"2026-09-02",tyd:"08:00",tydsduur:"3 ure"},
-  {vak:"English Paper 1 (Read)",datum:"2026-09-03",tyd:"08:00",tydsduur:"3 ure"},
-  {vak:"Toerisme",datum:"2026-09-04",tyd:"08:00",tydsduur:"3 ure"},
-  {vak:"Wiskunde Vraestel 2",datum:"2026-09-07",tyd:"08:00",tydsduur:"3 ure"},
-  {vak:"Wiskundige Geletterdheid Vraestel 2",datum:"2026-09-07",tyd:"08:00",tydsduur:"3 ure"},
-  {vak:"Afrikaans Vraestel 1 (Lees)",datum:"2026-09-08",tyd:"08:00",tydsduur:"3 ure"},
-  {vak:"Lewenswetenskap Vraestel 2",datum:"2026-09-10",tyd:"08:00",tydsduur:"2 ure"},
-  {vak:"RTT Teorie",datum:"2026-09-11",tyd:"08:00",tydsduur:"3 ure"},
-  {vak:"Fisiese Wetenskappe Vraestel 1",datum:"2026-09-14",tyd:"08:00",tydsduur:"3 ure"},
-  {vak:"Lewensoriëntering GTA (Deel B)",datum:"2026-09-15",tyd:"09:00",tydsduur:"2 ure"},
-  {vak:"Lewenswetenskap Vraestel 3",datum:"2026-09-16",tyd:"10:00",tydsduur:"1,5 ure"},
-  {vak:"Fisiese Wetenskappe Vraestel 2",datum:"2026-09-18",tyd:"08:00",tydsduur:"3 ure"}
+  {vak:"RTT Prakties (Dugga)",datum:"2026-08-11",tyd:"08:00",tydsduur:"3 ure",sperdatum:"2026-08-10"},
+  {vak:"Afrikaans Vraestel 2 (Skryf)",datum:"2026-08-24",tyd:"08:00",tydsduur:"3 ure",sperdatum:"2026-08-18"},
+  {vak:"Besigheidstudies",datum:"2026-08-25",tyd:"08:00",tydsduur:"3 ure",sperdatum:"2026-08-18"},
+  {vak:"IGO Vraestel 1 (A3 Druk)",datum:"2026-08-26",tyd:"08:00",tydsduur:"3 ure",sperdatum:"2026-08-18"},
+  {vak:"English Paper 2 (Write)",datum:"2026-08-27",tyd:"08:00",tydsduur:"3 ure",sperdatum:"2026-08-18"},
+  {vak:"Lewenswetenskappe Vraestel 1",datum:"2026-08-28",tyd:"08:00",tydsduur:"3 ure",sperdatum:"2026-08-18"},
+  {vak:"Wiskunde Vraestel 1",datum:"2026-08-31",tyd:"08:00",tydsduur:"3 ure",sperdatum:"2026-08-25"},
+  {vak:"Wiskundige Geletterdheid Vraestel 1",datum:"2026-08-31",tyd:"08:00",tydsduur:"3 ure",sperdatum:"2026-08-25"},
+  {vak:"Rekeningkunde Vraestel 1",datum:"2026-09-01",tyd:"08:00",tydsduur:"2 ure",sperdatum:"2026-08-25"},
+  {vak:"Geografie Vraestel 1",datum:"2026-09-01",tyd:"08:00",tydsduur:"3 ure",sperdatum:"2026-08-25"},
+  {vak:"Rekeningkunde Vraestel 2",datum:"2026-09-01",tyd:"13:00",tydsduur:"2 ure",sperdatum:"2026-08-25"},
+  {vak:"Geografie Vraestel 2",datum:"2026-09-01",tyd:"13:00",tydsduur:"1,5 ure",sperdatum:"2026-08-25"},
+  {vak:"IGO Vraestel 2 (A3 Druk)",datum:"2026-09-02",tyd:"08:00",tydsduur:"3 ure",sperdatum:"2026-08-25"},
+  {vak:"English Paper 1 (Read)",datum:"2026-09-03",tyd:"08:00",tydsduur:"3 ure",sperdatum:"2026-08-25"},
+  {vak:"Toerisme",datum:"2026-09-04",tyd:"08:00",tydsduur:"3 ure",sperdatum:"2026-08-25"},
+  {vak:"Wiskunde Vraestel 2",datum:"2026-09-07",tyd:"08:00",tydsduur:"3 ure",sperdatum:"2026-09-01"},
+  {vak:"Wiskundige Geletterdheid Vraestel 2",datum:"2026-09-07",tyd:"08:00",tydsduur:"3 ure",sperdatum:"2026-09-01"},
+  {vak:"Afrikaans Vraestel 1 (Lees)",datum:"2026-09-08",tyd:"08:00",tydsduur:"3 ure",sperdatum:"2026-09-01"},
+  {vak:"Lewenswetenskap Vraestel 2",datum:"2026-09-10",tyd:"08:00",tydsduur:"2 ure",sperdatum:"2026-09-01"},
+  {vak:"RTT Teorie",datum:"2026-09-11",tyd:"08:00",tydsduur:"3 ure",sperdatum:"2026-09-01"},
+  {vak:"Fisiese Wetenskappe Vraestel 1",datum:"2026-09-14",tyd:"08:00",tydsduur:"3 ure",sperdatum:"2026-09-08"},
+  {vak:"Lewensoriëntering GTA (Deel B)",datum:"2026-09-15",tyd:"09:00",tydsduur:"2 ure",sperdatum:"2026-09-08"},
+  {vak:"Lewenswetenskap Vraestel 3",datum:"2026-09-16",tyd:"10:00",tydsduur:"1,5 ure",sperdatum:"2026-09-08"},
+  {vak:"Fisiese Wetenskappe Vraestel 2",datum:"2026-09-18",tyd:"08:00",tydsduur:"3 ure",sperdatum:"2026-09-08"}
 ];
 
 // Voorbereiding- en terugvoer-sessies — word net EEN keer gebruik om die
@@ -1125,7 +1125,7 @@ function initDB(){
   if(!db.klaslystePerVraestel)db.klaslystePerVraestel={};
   if(!db.sessies)db.sessies=[];
   if(!db.seeded){
-    db.eksamens=DEFAULT_EKSAMENS.map((e,i)=>({id:"e2026g12_"+i,vak:e.vak,datum:e.datum,tyd:e.tyd,tydsduur:e.tydsduur,sperdatum:"",graad:"Graad 12",status:"In opstelproses"}));
+    db.eksamens=DEFAULT_EKSAMENS.map((e,i)=>({id:"e2026g12_"+i,vak:e.vak,datum:e.datum,tyd:e.tyd,tydsduur:e.tydsduur,sperdatum:e.sperdatum||"",graad:"Graad 12",status:"In opstelproses"}));
     db.seeded=true;
   }
   if(!db.sessiesSeeded){

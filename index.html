@@ -651,7 +651,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg2);color:#1e293b;min-he
       <div class="form-group"><label>Sperdatum (Dugga)</label><input id="eSperdatum" type="date"></div>
       <input type="hidden" id="eGraad" value="Graad 12">
     </div>
-    <div class="modal-foot"><button class="btn-sec" onclick="closeModal('modalEksamen')">Kanselleer</button><button class="btn-pri" onclick="saveEksamen()">Stoor</button></div>
+    <div class="modal-foot"><button class="btn-sec" onclick="closeModal('modalEksamen')">Kanselleer</button><button class="btn-pri" id="eksamenSaveBtn" onclick="saveEksamen()">Stoor</button></div>
   </div>
 </div>
 
@@ -1208,7 +1208,7 @@ function renderRooster(){
         <option value="Hangende herskryf" ${e.status==="Hangende herskryf"?"selected":""}>Hangende herskryf</option>
         <option value="Afgehandel" ${e.status==="Afgehandel"?"selected":""}>Afgehandel</option>
       </select></td>
-      <td>${roosterKOUnlocked?`<button onclick="delEksamen('${e.id}')" style="background:none;border:none;color:#ef4444;cursor:pointer;padding:4px 6px;border-radius:var(--radius);font-size:15px;" title="Verwyder"><i class="ti ti-trash" aria-hidden="true"></i></button>`:""}
+      <td>${roosterKOUnlocked?`<button onclick="editEksamen('${e.id}')" style="background:none;border:none;color:#64748b;cursor:pointer;padding:4px 6px;border-radius:var(--radius);font-size:15px;" title="Wysig"><i class="ti ti-edit" aria-hidden="true"></i></button><button onclick="delEksamen('${e.id}')" style="background:none;border:none;color:#ef4444;cursor:pointer;padding:4px 6px;border-radius:var(--radius);font-size:15px;" title="Verwyder"><i class="ti ti-trash" aria-hidden="true"></i></button>`:""}
       </td>`;
     tbody.appendChild(tr);
   });
@@ -2091,8 +2091,28 @@ function roosterSluitKO(){
 }
 
 function openAddEksamen(){
+  delete document.getElementById("eksamenSaveBtn").dataset.editId;
+  document.getElementById("modalEksamen").querySelector(".modal-head h2").textContent="Nuwe eksamen byvoeg";
+  document.getElementById("eVak").value="";
+  document.getElementById("eDatum").value="";
+  document.getElementById("eTyd").value="08:00";
+  document.getElementById("eSperdatum").value="";
   document.getElementById("modalEksamen").classList.add("open");
   document.getElementById("eGraad").value=currentGraad;
+}
+
+function editEksamen(id){
+  const e=db.eksamens.find(e=>e.id===id);
+  if(!e)return;
+  document.getElementById("modalEksamen").querySelector(".modal-head h2").textContent="Eksamen wysig";
+  document.getElementById("eVak").value=e.vak||"";
+  document.getElementById("eDatum").value=e.datum||"";
+  document.getElementById("eTyd").value=e.tyd||"08:00";
+  if(e.tydsduur)document.getElementById("eTydsduur").value=e.tydsduur;
+  document.getElementById("eSperdatum").value=e.sperdatum||"";
+  document.getElementById("eGraad").value=e.graad||currentGraad;
+  document.getElementById("eksamenSaveBtn").dataset.editId=id;
+  document.getElementById("modalEksamen").classList.add("open");
 }
 let bystandKOUnlocked=false;
 
@@ -2173,12 +2193,22 @@ function closeModal(id){document.getElementById(id).classList.remove("open");}
 function saveEksamen(){
   const vak=document.getElementById("eVak").value.trim();
   if(!vak)return;
-  const id="e"+Date.now();
   const graad=document.getElementById("eGraad").value;
-  db.eksamens.push({id,vak,datum:document.getElementById("eDatum").value,tyd:document.getElementById("eTyd").value,tydsduur:document.getElementById("eTydsduur").value,sperdatum:document.getElementById("eSperdatum").value,graad,status:"In opstelproses"});
-  db.checks[id]={};ALL_IDS.forEach(iid=>{db.checks[id][iid]=false;});
-  save();closeModal("modalEksamen");renderAll();
-  showToast(vak+" bygevoeg");
+  const editId=document.getElementById("eksamenSaveBtn").dataset.editId;
+  const velde={vak,datum:document.getElementById("eDatum").value,tyd:document.getElementById("eTyd").value,tydsduur:document.getElementById("eTydsduur").value,sperdatum:document.getElementById("eSperdatum").value,graad};
+  if(editId){
+    const e=db.eksamens.find(e=>e.id===editId);
+    if(e)Object.assign(e,velde);
+    delete document.getElementById("eksamenSaveBtn").dataset.editId;
+    save();closeModal("modalEksamen");renderAll();
+    showToast(vak+" opgedateer");
+  } else {
+    const id="e"+Date.now();
+    db.eksamens.push({id,...velde,status:"In opstelproses"});
+    db.checks[id]={};ALL_IDS.forEach(iid=>{db.checks[id][iid]=false;});
+    save();closeModal("modalEksamen");renderAll();
+    showToast(vak+" bygevoeg");
+  }
   document.getElementById("eVak").value="";
 }
 
